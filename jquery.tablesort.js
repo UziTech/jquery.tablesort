@@ -59,11 +59,11 @@
 					column: column
 				});
 				plugin.$tds.filter(":nth-child(" + (i + 1) + ")").addClass(column);
-			}).wrapInner("<span class='tablesort-label' />").append("<span class='tablesort-sortdesc'>&#9650;</span>", "<span class='tablesort-sortasc'>&#9660;</span>").on("click.tablesort", function (e) {
+			}).wrapInner("<span class='tablesort-label' />").prepend("<div class='tablesort-arrows'><span class='tablesort-sortdesc'>&#9650;</span><span class='tablesort-sortasc'>&#9660;</span></div>").on("click.tablesort", function (e) {
 				var $this = $(this);
 				if ($this.hasClass("sortable")) {
 					var $target = $(e.target);
-					//TODO: if $target.hasClass("tablesort-sortasc") then force asc, etc.
+					//TODO: if ctrl key down then add sort
 					var sort = plugin.$thead.data().sort || " ";
 					var current = sort.split(" ");
 					var column = $this.data().column;
@@ -117,7 +117,7 @@
 			plugin.$ths.off(".tablesort").each(function (i) {
 				var $this = $(this);
 				var column = "tablesort-" + i;
-				$this.removeClass(column).unwrapInner("span.tablesort-label").find(".tablesort-sortasc, .tablesort-sortdesc").remove();
+				$this.removeClass(column).unwrapInner("span.tablesort-label").find(".tablesort-arrows").remove();
 				delete $this.data().column;
 				plugin.$tds.filter(":nth-child(" + (i + 1) + ")").removeClass(column);
 			});
@@ -136,26 +136,31 @@
 
 	$(function () {
 		var $style = $("<style class='" + pluginName + "'>" +
-				".tablesort-sortdesc, .tablesort-sortasc{" +
+				".tablesort-arrows{" +
 				"display: none;" +
 				"}"+
 				".sortable{" +
-				"position: relative;" +
-				"min-height: 2em;" +
 				"cursor: pointer;" +
 				"}" +
+				".sortable .tablesort-arrows{" +
+				"display: block;" +
+				"float: right;" +
+				"position: relative;" +
+				"height: 2.2em;" +
+				"}" +
 				".sortable .tablesort-label{" +
-				"display: inline-block;" +
+				"display: table-cell;" +
 				"padding-right: 1em;" +
+				"vertical-align: middle;" +
+				"height: 2.2em;" +
 				"}" +
 				".sortable .tablesort-sortdesc, .sortable .tablesort-sortasc{" +
-				"display: block;" +
 				"position: absolute;" +
-				"right: 1px;" +
+				"right: 0px;" +
 				"color: #666;" +
 				"}" +
 				".sortable .tablesort-sortdesc{" +
-				"top: 0;" +
+				"top: 0px;" +
 				"}" +
 				".sortable .tablesort-sortasc{" +
 				"top: 1em;" +
