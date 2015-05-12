@@ -38,8 +38,8 @@
 		},
 		_init: function (options) {
 			var plugin = this;
-			
-			if(plugin.initialized){
+
+			if (plugin.initialized) {
 				throw "Already Initialized";
 			}
 
@@ -59,7 +59,7 @@
 					column: column
 				});
 				plugin.$tds.filter(":nth-child(" + (i + 1) + ")").addClass(column);
-			}).wrapInner("<span class='tablesort-label' />").prepend("<div class='tablesort-arrows'><span class='tablesort-sortdesc'>&#9650;</span><span class='tablesort-sortasc'>&#9660;</span></div>").on("click.tablesort", function (e) {
+			}).wrapInner("<span class='tablesort-label' />").append("<span class='tablesort-arrows'><div><span class='tablesort-sortdesc'>&#9650;</span><span class='tablesort-sortasc'>&#9660;</span></div></span>").wrapInner("<div class='tablesort-th' />").on("click.tablesort", function (e) {
 				var $this = $(this);
 				if ($this.hasClass("sortable")) {
 					var $target = $(e.target);
@@ -72,7 +72,7 @@
 					if ($target.hasClass("tablesort-sortdesc") || (current[0] === column && current[1] === "asc" && !$target.hasClass("tablesort-sortasc"))) {
 						direction = "desc";
 					}
-					if(sort === column + " " + direction){
+					if (sort === column + " " + direction) {
 						return;
 					}
 					plugin.$thead.data({sort: column + " " + direction});
@@ -108,7 +108,7 @@
 					}).appendTo(plugin.$tbody);
 				}
 			});
-			
+
 			plugin.initialized = true;
 		},
 		destroy: function () {
@@ -117,7 +117,7 @@
 			plugin.$ths.off(".tablesort").each(function (i) {
 				var $this = $(this);
 				var column = "tablesort-" + i;
-				$this.removeClass(column).unwrapInner("span.tablesort-label").find(".tablesort-arrows").remove();
+				$this.removeClass(column).unwrapInner("span.tablesort-th").unwrapInner("span.tablesort-label").find(".tablesort-arrows").remove();
 				delete $this.data().column;
 				plugin.$tds.filter(":nth-child(" + (i + 1) + ")").removeClass(column);
 			});
@@ -125,7 +125,7 @@
 			delete plugin.$table.data()[pluginName];
 		}
 	};
-	
+
 	$[pluginName].prototype = pluginPrototype;
 
 	$.fn[pluginName] = function (options) {
@@ -135,24 +135,30 @@
 	};
 
 	$(function () {
-		var $style = $("<style class='" + pluginName + "'>" +
+		var $style = $("<style class='" + pluginName + "-stylesheet'>" +
 				".tablesort-arrows{" +
 				"display: none;" +
-				"}"+
+				"}" +
 				".sortable{" +
 				"cursor: pointer;" +
 				"}" +
+				".sortable .tablesort-th{" +
+				"display: table;" +
+				"width: 100%;" +
+				"}" +
 				".sortable .tablesort-arrows{" +
-				"display: block;" +
-				"float: right;" +
+				"display: table-cell;" +
+				"width: 1.1em;" +
+				"vertical-align: middle;" +
+				"}" +
+				".sortable .tablesort-arrows div{" +
 				"position: relative;" +
-				"height: 2.2em;" +
+				"width: 1.1em;" +
+				"min-height: 2.2em;" +
 				"}" +
 				".sortable .tablesort-label{" +
 				"display: table-cell;" +
-				"padding-right: 1em;" +
 				"vertical-align: middle;" +
-				"height: 2.2em;" +
 				"}" +
 				".sortable .tablesort-sortdesc, .sortable .tablesort-sortasc{" +
 				"position: absolute;" +
