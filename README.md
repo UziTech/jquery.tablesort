@@ -5,7 +5,7 @@ Simple jQuery plugin for sorting table rows
 ```html
 <script src="/path/to/jquery.tablesort.js"></script>
 ```
-#### Add class="sortable" to any sortable columns along with a data-sorttype attribute if you want it to sort by something other that string.
+#### Add class="sortable" to any sortable columns along with a data-sorttype attribute if you want it to sort by something other than string.
 ```html
 <table>
   <thead>
@@ -42,7 +42,7 @@ Simple jQuery plugin for sorting table rows
 ```javascript
 $("table").tablesort();
 ```
-
+## More Options
 #### Create custom sort.
 create a custom sorttype to sort date range by first date
 
