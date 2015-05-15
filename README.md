@@ -43,7 +43,7 @@ Simple jQuery plugin for sorting table rows
 $("table").tablesort();
 ```
 ## More Options
-#### Create custom sort.
+#### Create custom sorttype.
 create a custom sorttype to sort date range by first date
 
 |   date range    |
