@@ -42,3 +42,40 @@ Simple jQuery plugin for sorting table rows
 ```javascript
 $("table").tablesort();
 ```
+
+#### Create custom sort.
+create a custom sorttype to sort date range by first date
+
+|   date range    |
+-------------------
+|5/17/15 - 5/23/15|
+|5/10/15 - 5/16/15|
+|5/03/15 - 5/09/15|
+|4/26/15 - 5/02/15|
+|4/19/15 - 5/25/15|
+
+```html
+      <th class="sortable" data-sorttype="date-range">date range</th>
+```
+```javascript
+$("table").tablesort({
+	sorttypes: {
+		"date-range": function (a, b) {
+			var am = a.match(/^\d+\/\d+\/\d+/);
+			var bm = b.match(/^\d+\/\d+\/\d+/);
+			if (am === null || bm === null) {
+				return 0;
+			}
+			var av = new Date(am[0]);
+			var bv = new Date(bm[0]);
+			if (av < bv) {
+				return -1;
+			} else if (av > bv) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+	}
+});
+```

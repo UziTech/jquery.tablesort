@@ -34,7 +34,63 @@
 
 	var pluginPrototype = {
 		_defaults: {
-			//TODO: PUT DEFAULT OPTIONS HERE
+			sorttypes: {
+				date: function (a, b) {
+					var av = new Date(a);
+					var bv = new Date(b);
+					if (av < bv) {
+						return -1;
+					} else if (av > bv) {
+						return 1;
+					} else {
+						return 0;
+					}
+				},
+				time: function (a, b) {
+					var av, bv;
+					var aneg = (a.substring(0, 1) === "-");
+					var bneg = (b.substring(0, 1) === "-");
+					if (aneg && bneg) {
+						av = new Date("2000-01-01 " + b.substring(1));
+						bv = new Date("2000-01-01 " + a.substring(1));
+					} else if (aneg || bneg) {
+						av = +bneg;
+						bv = +aneg;
+					} else {
+						av = new Date("2000-01-01 " + a);
+						bv = new Date("2000-01-01 " + b);
+					}
+					if (av < bv) {
+						return -1;
+					} else if (av > bv) {
+						return 1;
+					} else {
+						return 0;
+					}
+				},
+				number: function (a, b) {
+					var av = new Number(a.replace(/,/g, ""));
+					var bv = new Number(b.replace(/,/g, ""));
+					if (av < bv) {
+						return -1;
+					} else if (av > bv) {
+						return 1;
+					} else {
+						return 0;
+					}
+				},
+				string: function (a, b) {
+					var av = a.toLowerCase();
+					var bv = b.toLowerCase();
+					if (av < bv) {
+						return -1;
+					} else if (av > bv) {
+						return 1;
+					} else {
+						return 0;
+					}
+				}
+			}
 		},
 		_init: function (options) {
 			var plugin = this;
@@ -81,30 +137,11 @@
 					}
 					$("." + column).addClass("tablesort-" + direction);
 					//sort
-					var sortdir = (direction === "asc" ? -1 : 1);
+					var sortdir = (direction === "asc" ? 1 : -1);
 					plugin.$rows.sort(function (a, b) {
-						var av, bv;
-						switch (sorttype) {
-							case "date":
-								av = new Date($("." + column, a).text());
-								bv = new Date($("." + column, b).text());
-								break;
-							case "number":
-								av = new Number($("." + column, a).text().replace(/,/g, ""));
-								bv = new Number($("." + column, b).text().replace(/,/g, ""));
-								break;
-							default:
-								av = $("." + column, a).text().toLowerCase();
-								bv = $("." + column, b).text().toLowerCase();
-								break;
-						}
-						if (av < bv) {
-							return sortdir;
-						} else if (av > bv) {
-							return -sortdir;
-						} else {
-							return 0;
-						}
+						var atext = $("." + column, a).text();
+						var btext = $("." + column, b).text();
+						return sortdir * plugin.options.sorttypes[sorttype](atext, btext);
 					}).appendTo(plugin.$tbody);
 				}
 			});
