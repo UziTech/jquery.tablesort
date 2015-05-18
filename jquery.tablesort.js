@@ -98,7 +98,8 @@
 			if (plugin.initialized) {
 				throw "Already Initialized";
 			}
-
+			
+			$.extend(options.sorttypes, plugin._defaults.sorttypes);
 			plugin.options = $.extend({}, plugin._defaults, options);
 
 			plugin.$thead = $("thead", plugin.$table);
