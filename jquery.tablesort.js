@@ -3,7 +3,6 @@
  * License: MIT 
  * Description: Sort tables by clicking on headers
  */
-;
 (function ($, undefined) {
 	"use strict";
 	var pluginName = "tablesort";
@@ -23,9 +22,9 @@
 			plugin.$table.data(pluginName, plugin);
 		}
 
-		if (typeof (options) === "object" || options === undefined) {
+		if (typeof options === "object" || options === undefined) {
 			plugin._init(options);
-		} else if (typeof (options) === "string" && options.substring(0, 1) !== "_" && typeof plugin[options] === "function") {
+		} else if (typeof options === "string" && options.substring(0, 1) !== "_" && typeof plugin[options] === "function") {
 			plugin[options].apply(plugin, Array.prototype.slice.call(arguments, 1));
 		} else {
 			throw "Invalid Arguments";
@@ -40,11 +39,11 @@
 					var bv = new Date(b);
 					if (av < bv) {
 						return -1;
-					} else if (av > bv) {
-						return 1;
-					} else {
-						return 0;
 					}
+					if (av > bv) {
+						return 1;
+					}
+					return 0;
 				},
 				time: function (a, b) {
 					var av, bv;
@@ -62,35 +61,37 @@
 					}
 					if (av < bv) {
 						return -1;
-					} else if (av > bv) {
-						return 1;
-					} else {
-						return 0;
 					}
+					if (av > bv) {
+						return 1;
+					}
+					return 0;
 				},
 				number: function (a, b) {
-					var av = new Number(a.replace(/,/g, ""));
-					var bv = new Number(b.replace(/,/g, ""));
+					var av = Number(a.replace(/,/g, ""));
+					var bv = Number(b.replace(/,/g, ""));
 					if (av < bv) {
 						return -1;
-					} else if (av > bv) {
-						return 1;
-					} else {
-						return 0;
 					}
+					if (av > bv) {
+						return 1;
+					}
+					return 0;
 				},
 				string: function (a, b) {
 					var av = a.toLowerCase();
 					var bv = b.toLowerCase();
 					if (av < bv) {
 						return -1;
-					} else if (av > bv) {
-						return 1;
-					} else {
-						return 0;
 					}
+					if (av > bv) {
+						return 1;
+					}
+					return 0;
 				}
-			}
+			},
+			initColumn: false,
+			initDirection: "asc"
 		},
 		_init: function (options) {
 			var plugin = this;
@@ -98,10 +99,12 @@
 			if (plugin.initialized) {
 				throw "Already Initialized";
 			}
-			if (options && options.sorttypes) {
-				$.extend(options.sorttypes, plugin._defaults.sorttypes);
+			if (options === undefined) {
+				plugin.options = plugin._defaults;
+			} else {
+				options.sorttypes = $.extend({}, plugin._defaults.sorttypes, options.sorttypes);
+				plugin.options = $.extend({}, plugin._defaults, options);
 			}
-			plugin.options = $.extend({}, plugin._defaults, options);
 
 			plugin.$thead = $("thead", plugin.$table);
 			plugin.$tbody = $("tbody", plugin.$table);
@@ -121,32 +124,28 @@
 				var $this = $(this);
 				if ($this.hasClass("sortable")) {
 					var $target = $(e.target);
-					//TODO: if ctrl key down then add sort
 					var sort = plugin.$thead.data().sort || " ";
 					var current = sort.split(" ");
 					var column = $this.data().column;
 					var direction = "asc";
-					var sorttype = $this.data().sorttype || "string";
 					if ($target.hasClass("tablesort-sortdesc") || (current[0] === column && current[1] === "asc" && !$target.hasClass("tablesort-sortasc"))) {
 						direction = "desc";
 					}
 					if (sort === column + " " + direction) {
 						return;
 					}
-					plugin.$thead.data({sort: column + " " + direction});
 					if (current[0]) {
-						$("." + current[0]).removeClass("tablesort-" + current[1]);
+						$("." + current[0], plugin.$thead).removeClass("tablesort-" + current[1]);
 					}
-					$("." + column).addClass("tablesort-" + direction);
-					//sort
-					var sortdir = (direction === "asc" ? 1 : -1);
-					plugin.$rows.sort(function (a, b) {
-						var atext = $("." + column, a).text();
-						var btext = $("." + column, b).text();
-						return sortdir * plugin.options.sorttypes[sorttype](atext, btext);
-					}).appendTo(plugin.$tbody);
+					plugin._sort(column, direction);
 				}
 			});
+
+			if (plugin.options.initColumn !== false) {
+				var column = ($.isNumeric(plugin.options.initColumn) ? "tablesort-" + plugin.options.initColumn : plugin.options.initColumn);
+				var direction = (plugin.options.initDirection.toLowerCase() === "desc" ? "desc" : "asc");
+				plugin._sort(column, direction);
+			}
 
 			plugin.initialized = true;
 		},
@@ -162,6 +161,21 @@
 			});
 
 			delete plugin.$table.data()[pluginName];
+		},
+		_sort: function (column, direction) {
+			var plugin = this;
+			var $this = $("." + column, plugin.$thead);
+			//TODO: if ctrl key down then add sort
+			var sorttype = $this.data().sorttype || "string";
+			plugin.$thead.data({sort: column + " " + direction});
+			$this.addClass("tablesort-" + direction);
+			//sort
+			var sortdir = (direction === "asc" ? 1 : -1);
+			plugin.$rows.sort(function (a, b) {
+				var atext = $("." + column, a).text();
+				var btext = $("." + column, b).text();
+				return sortdir * plugin.options.sorttypes[sorttype](atext, btext);
+			}).appendTo(plugin.$tbody);
 		}
 	};
 
@@ -169,7 +183,7 @@
 
 	$.fn[pluginName] = function (options) {
 		return this.each(function () {
-			(new $[pluginName](this, options));
+			new $[pluginName](this, options);
 		});
 	};
 
@@ -222,19 +236,18 @@
 		}
 	});
 
-})(jQuery);
-
-// unwrapInner function
-// http://wowmotty.blogspot.com/2012/07/jquery-unwrapinner.html
-jQuery.fn.extend({
-	unwrapInner: function (selector) {
-		return this.each(function () {
-			var t = this,
-					c = $(t).children(selector);
-			if (c.length === 1) {
-				c.contents().appendTo(t);
-				c.remove();
-			}
-		});
-	}
-});
+	// unwrapInner function
+	// http://wowmotty.blogspot.com/2012/07/jquery-unwrapinner.html
+	$.fn.extend({
+		unwrapInner: function (selector) {
+			return this.each(function () {
+				var t = this,
+						c = $(t).children(selector);
+				if (c.length === 1) {
+					c.contents().appendTo(t);
+					c.remove();
+				}
+			});
+		}
+	});
+}(jQuery));
